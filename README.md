@@ -1,26 +1,27 @@
 # Design Patterns com Java e Spring
-Design Patterns com Java (GoF) e Spring Boot
+# Design Patterns com Java (GoF) e Spring Boot
 
-Projeto do Bootcamp DIO: Dos Clássicos (GoF) ao Spring Framework
-Implementações com Java Puro (Singleton, Strategy, Facade) e uma API REST Spring Boot aplicando Strategy e Facade.
+> Desafio do Bootcamp DIO — **Dos Clássicos (GoF) ao Spring Framework**  
+> Implementações com **Java Puro** (Singleton, Strategy, Facade) e uma **API REST** com **Spring Boot** aplicando Strategy + Facade.
 
-📚 Conteúdo
+![Java](https://img.shields.io/badge/Java-17+-red) ![Spring](https://img.shields.io/badge/Spring_Boot-3.x-brightgreen) ![Maven](https://img.shields.io/badge/Build-Maven-blue) ![DB](https://img.shields.io/badge/DB-H2-informational)
 
-Padrões de Projeto (GoF)
+---
 
-Java Puro: Singleton, Strategy, Facade
+## 📚 Conteúdos
 
-Spring:
+- Padrões de Projeto (GoF)
+- **Java Puro**: Singleton, Strategy, Facade
+- **Spring Boot**:
+  - API REST (CRUD mínimo de `Produto`)
+  - Strategy (cálculo de desconto)
+  - Facade (orquestração de cadastro + notificação)
+  - Observação: beans no Spring são **Singleton** por padrão
 
-API REST (CRUD de Produto)
-
-Strategy (cálculo de desconto)
-
-Facade (orquestração de cadastro + notificação)
-
-Observação: beans do Spring são Singleton por padrão
+---
 
 ## 🏗 Estrutura do Repositório
+
 
 ├── README.md
 ├── pom.xml
@@ -45,22 +46,23 @@ Observação: beans do Spring são Singleton por padrão
     ├── strategy/StrategyDemo.java
     └── facade/FacadeDemo.java
 
+> **Pacote base do projeto Spring**: `br.com.fpoontes.design_patterns_spring`.  
+> Se mover arquivos, ajuste a primeira linha `package ...;` para bater com a pasta.
 
-Pacote base usado no projeto Spring: br.com.fpoontes.design_patterns_spring.
-Se você mover arquivos, ajuste a primeira linha package ...; para bater com a pasta.
+---
 
-✅ Requisitos
+## ✅ Requisitos
 
-JDK 17+
+- **JDK 17+**
+- **Maven 3.9+** (ou `mvnw`/`mvnw.cmd`)
+- IDE (IntelliJ IDEA recomendado)
 
-Maven 3.9+ (ou use o wrapper mvnw/mvnw.cmd)
+---
 
-IDE (IntelliJ IDEA recomendado)
+## ⚙️ Configuração do Banco (H2 em memória)
 
-⚙️ Configuração do Banco (H2 em memória)
-
-src/main/resources/application.properties
-
+`src/main/resources/application.properties`
+```properties
 spring.datasource.url=jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
 spring.datasource.username=sa
 spring.datasource.password=
@@ -74,35 +76,31 @@ spring.h2.console.enabled=true
 spring.h2.console.path=/h2
 
 
-Console H2: http://localhost:8080/h2
-JDBC URL: jdbc:h2:mem:db | user: sa | senha: (em branco)
+Pacote base usado no projeto Spring: br.com.fpoontes.design_patterns_spring.
+Se você mover arquivos, ajuste a primeira linha package ...; para bater com a pasta.
 
-🚀 Como Rodar
-Clonar e subir a API
+## 🚀 Como Rodar
+
+# Clonar
 git clone https://github.com/fpoontes/design-patterns-java-spring.git
 cd design-patterns-java-spring
+
+# Rodar a API
 mvn spring-boot:run
 # ou no Windows:
 # .\mvnw.cmd spring-boot:run
-
-
-A aplicação sobe em: http://localhost:8080
-
 🧪 Endpoints (API REST)
-1) Criar produto (com Strategy de desconto opcional)
+1) Criar produto (Strategy de desconto opcional)
 POST /produtos?strategy={none|pix|blackfriday}
 Content-Type: application/json
 
 
 Body:
 
-{
-  "nome": "Notebook",
-  "preco": 3000.0
-}
+{ "nome": "Notebook", "preco": 3000.0 }
 
 
-Exemplo (PIX 5% OFF via cURL):
+Exemplo (PIX 5% OFF):
 
 curl -X POST "http://localhost:8080/produtos?strategy=pix" \
   -H "Content-Type: application/json" \
@@ -118,13 +116,10 @@ curl -X POST "http://localhost:8080/produtos" \
 2) Listar produtos
 GET /produtos
 
-
-Exemplo:
-
 curl http://localhost:8080/produtos
 
 🧠 Padrões Implementados
-Java Puro (pasta java-puro/)
+Java Puro (java-puro/)
 
 Singleton: controle de única instância (SingletonDemo.java)
 
@@ -148,7 +143,7 @@ Orquestra o salvar produto e o envio de notificação
 
 Singleton (Spring): por padrão, beans (@Service, @Component, @Repository, @Controller) são Singleton
 
-🧩 Como Estender (exemplos rápidos)
+🧩 Como Estender
 Nova estratégia de desconto
 
 Criar classe em service/desconto/:
@@ -162,125 +157,57 @@ public class CupomDesconto implements DescontoStrategy {
 
 Usar: POST /produtos?strategy=cupom10
 
-Substituir a persistência
+Trocar H2 por Postgres/MySQL
 
-Troque H2 por Postgres/MySQL no application.properties
+Ajuste application.properties (URL, usuário, senha)
 
-Ajuste a URL do datasource e dependências no pom.xml
-
-🧾 Códigos-chave (recorte)
-Produto.java
-@Entity
-public class Produto {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String nome;
-    private double preco;
-    // getters/setters/constructors
-}
-
-DescontoStrategy.java
-public interface DescontoStrategy {
-    String key();
-    double calcular(double preco);
-}
-
-ProdutoService.java
-@Service
-public class ProdutoService {
-    private final ProdutoRepository repository;
-    private final Map<String, DescontoStrategy> strategyMap;
-
-    public ProdutoService(ProdutoRepository repository, List<DescontoStrategy> strategies) {
-        this.repository = repository;
-        this.strategyMap = strategies.stream()
-            .collect(Collectors.toMap(DescontoStrategy::key, s -> s));
-    }
-
-    public List<Produto> listar() { return repository.findAll(); }
-
-    public Produto salvar(Produto p, String strategyKey) {
-        DescontoStrategy s = strategyMap.getOrDefault(
-            strategyKey == null ? "none" : strategyKey.toLowerCase(),
-            strategyMap.get("none")
-        );
-        p.setPreco(s.calcular(p.getPreco()));
-        return repository.save(p);
-    }
-}
-
-CadastrarProdutoFacade.java
-@Component
-public class CadastrarProdutoFacade {
-    private final ProdutoService produtoService;
-    private final NotificacaoService notificacaoService;
-
-    public CadastrarProdutoFacade(ProdutoService ps, NotificacaoService ns) {
-        this.produtoService = ps;
-        this.notificacaoService = ns;
-    }
-
-    public Produto executar(Produto produto, String strategyKey) {
-        Produto salvo = produtoService.salvar(produto, strategyKey);
-        notificacaoService.enviar("Produto cadastrado: " + salvo.getNome()
-            + " | Preço final: " + salvo.getPreco());
-        return salvo;
-    }
-}
-
-ProdutoController.java
-@RestController
-@RequestMapping("/produtos")
-public class ProdutoController {
-    private final ProdutoService produtoService;
-    private final CadastrarProdutoFacade facade;
-
-    public ProdutoController(ProdutoService produtoService, CadastrarProdutoFacade facade) {
-        this.produtoService = produtoService;
-        this.facade = facade;
-    }
-
-    @PostMapping
-    public Produto salvar(@RequestBody Produto produto,
-                          @RequestParam(name = "strategy", defaultValue = "none") String strategy) {
-        return facade.executar(produto, strategy);
-    }
-
-    @GetMapping
-    public List<Produto> listar() { return produtoService.listar(); }
-}
-
-📝 Checklist de Entrega (DIO)
-
- Projeto público no GitHub
-
- README com: descrição, como rodar, endpoints, padrões utilizados
-
- Java Puro: Singleton / Strategy / Facade (pasta java-puro/)
-
- Spring: API /produtos com Strategy + Facade
-
- Prints/GIF (opcional) do H2 console e requisições
-
- Commits claros e pom.xml ok
+Inclua dependência do driver no pom.xml
 
 🔗 Links Úteis
 
-Slides / Materiais da DIO (adicione aqui o link do seu bootcamp)
+Slides do Bootcamp DIO: (adicione aqui o link do seu bootcamp / aula)
 
-GoF em Java (referência): https://refactoring.guru/pt-br/design-patterns/java
+GoF em Java (ref.): https://refactoring.guru/pt-br/design-patterns/java
 
 Spring Boot Docs: https://docs.spring.io/spring-boot/
 
+📝 Checklist DIO
+
+ Repositório público no GitHub
+
+ README com: descrição, como rodar, endpoints, padrões
+
+ Java Puro: Singleton / Strategy / Facade (java-puro/)
+
+ Spring: API /produtos com Strategy + Facade
+
+ Prints/GIF (opcional) do H2 e das requisições
+
+ Commits claros
+
 📄 Licença
 
-Este projeto é distribuído sob a licença MIT. Sinta-se livre para usar e adaptar.
+MIT — use e adapte livremente.
 
-Observações (Windows)
 
-Se aparecer aviso LF will be replaced by CRLF, é normal no Windows. Para padronizar, adicione .gitattributes:
+---
 
-* text=auto eol=lf
-*.bat text eol=crlf
-*.ps1 text eol=crlf
-*.sh  text eol=lf
+## 💾 Como atualizar o README no seu repo
+
+### Opção A — Pelo GitHub (mais simples)
+1. Abra o seu repo → clique em **README.md** → **Edit** (lápis).  
+2. Apague o conteúdo atual e **cole** o README acima.  
+3. **Commit changes**.
+
+### Opção B — Pelo terminal (Git Bash / PowerShell)
+> Dentro da pasta do projeto:
+
+```bash
+# Windows (Git Bash) / Linux / macOS
+cat > README.md << 'EOF'
+# (cole AQUI todo o conteúdo do README acima)
+EOF
+
+git add README.md
+git commit -m "docs: atualiza README com patterns GoF + Spring"
+git push
