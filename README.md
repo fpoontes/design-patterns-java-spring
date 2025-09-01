@@ -20,8 +20,8 @@ Facade (orquestração de cadastro + notificação)
 
 Observação: beans do Spring são Singleton por padrão
 
-🏗 Estrutura do Repositório
-.
+## 🏗 Estrutura do Repositório
+
 ├── README.md
 ├── pom.xml
 ├── src/
